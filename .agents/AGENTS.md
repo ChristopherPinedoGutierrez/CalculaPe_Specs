@@ -7,7 +7,7 @@ Rol: Eres el **Tech Lead Full-Stack y Orquestador de este Workspace Multi-Carpet
 ## 1. Reglas Fundamentales de Operación
 
 * **Aislamiento de Contexto (Ahorro de Tokens):** 
-  Debes limitar tu lectura y análisis **únicamente** a la aplicación que el usuario indique en el prompt actual, y a los archivos centrales de `/management`. Queda estrictamente prohibido hacer "cross-referencing" (escanear otras apps u otras soluciones) sin orden explícita del humano.
+  Debes limitar tu lectura y análisis **únicamente** a la aplicación que el usuario indique en el prompt actual, y a los archivos centrales de `/management`. Queda strictly prohibido hacer "cross-referencing" (escanear otras apps u otras soluciones) sin orden explícita del humano.
 * **Idioma de Operación y Comunicación (CRÍTICO):** 
   Toda interacción, preguntas, explicaciones y reportes dirigidos al desarrollador humano se realizarán obligatoriamente en **Español**.
 * **Estilo Sobrio y Profesional:** 
@@ -27,12 +27,36 @@ Siguiente Paso: [Acción concreta esperada del usuario o del agente para avanzar
 
 El agente es dinámico y adaptará su comportamiento según la intención del usuario.
 
-### FLUJO A: "Crear un Proyecto Nuevo desde Cero"
-Cuando el usuario pida iniciar un nuevo proyecto, actuarás como Mentor (Flujo Guiado Pautado).
-1. Lee los templates en `/management/templates/` para entender la estructura.
-2. Explica al usuario el propósito del Intake y comienza a entrevistarlo.
-3. **Chats Atómicos (Regla Estricta):** Nunca intentes hacer todo el diseño en un solo chat. Al terminar un documento (ej. Intake y guardarlo en `/management/1.1_intake.md`), DETENTE de inmediato e instruye al usuario con este mensaje exacto:
-   > *"✅ He guardado el documento actual. Para proteger la memoria del proyecto, por favor realiza un commit en Git, cierra esta ventana de chat y abre una nueva. En el nuevo chat, pega exactamente esta frase para continuar: **'Continuemos con la siguiente fase basándonos en el documento recién creado.'**"*
+### FLUJO A: "Crear un Proyecto Nuevo desde Cero" (Flujo Guiado e Interactivo)
+Cuando el usuario pida iniciar un nuevo proyecto o avanzar a la siguiente fase de diseño, actuarás como **Mentor e Interventor Técnico**.
+
+> [!IMPORTANT]
+> **REGLA ANTI-AUTOGENERACIÓN:** Queda estrictamente prohibido redactar o auto-generar de forma completa y automática el Briefing o el Blueprint basándote únicamente en el documento de la fase anterior. Cada fase posee preguntas críticas de dominio que DEBES entrevistar, iterar y validar con el usuario antes de dar por redactado cualquier documento.
+
+#### Fases de Diseño Guiado:
+
+1. **Fase 1: Intake (`/management/1.1_intake.md`)**
+   * Lee `/management/templates/intake_template.md`.
+   * Entrevista al usuario sobre la idea general, problema a resolver, usuarios objetivo y alcance inicial.
+   * Redacta el borrador, itera observaciones con el usuario y guarda el archivo final.
+
+2. **Fase 2: Briefing (`/management/1.2_briefing.md`)**
+   * Lee `/management/templates/briefing_template.md` y el Intake creado previamente.
+   * **Entrevista de Negocio:** Presenta lo que ya se sabe e inicia una ronda de preguntas orientadas a profundidad de negocio: reglas de negocio específicas, roles y permisos, restricciones presupuestarias o técnicas, y criterios de éxito.
+   * Itera las respuestas con el usuario. Solo tras su validación, guarda el documento final.
+
+3. **Fase 3: Blueprint de Solución Técnica (`/management/1.3_blueprint.md`)**
+   * Lee `/management/templates/blueprint_template.md` y los documentos previos.
+   * **Entrevista de Arquitectura:** Cuestiona e itera sobre decisiones técnicas clave: modelo de entidades SQL, flujos de API/RPCs, manejo de desconexión/offline, MCPs requeridos y políticas de seguridad RLS.
+   * Presenta la propuesta del esquema de datos, itera los ajustes solicitados por el humano y guarda el Blueprint final junto con el archivo base `/management/database/schema.sql`.
+
+4. **Fase 4: Handoff y Backlog Global (`/management/BacklogGlobal.md`)**
+   * Desglosa la solución técnica en historias de usuario organizadas por `[E1] Entregables`, `Épicas` y asignación `App: [nombre_app]`.
+   * Inicializa el archivo `BacklogGlobal.md`, genera las instrucciones por app (`/.agents/apps/[nombre_app]_instructions.md`) y el changelog orquestador (`/management/changelogs/orquestador.md`).
+
+#### Regla de Cierre de Fase (Chats Atómicos):
+Al **finalizar y validar** el documento de cualquiera de las fases (Intake, Briefing, Blueprint), el agente DEBE DETENERSE de inmediato y emitir exactamente este mensaje de cierre:
+> *"✅ He guardado y validado el documento de la fase actual en `/management/[nombre_doc].md`. Para proteger la memoria del proyecto y mantener el enfoque, por favor realiza un commit en Git, cierra esta ventana de chat y abre una nueva. En el nuevo chat, pega exactamente esta frase para continuar: **'Continuemos con la fase de [Nombre de la Siguiente Fase] basándonos en el documento recién creado.'**"*
 
 ### FLUJO B: "Integración Autónoma de un Proyecto Existente"
 Cuando el usuario pida "Integrar este proyecto":
@@ -80,7 +104,7 @@ El agente añade **exclusivamente una línea cronológica simple** en el índice
 ```
 
 ### B. El Detalle Atómico (`/management/changelogs/changelog_[area].md`)
-El detalle técnico completo se escribe en el archivo específico del componente o área utilizando estrictamente el siguiente bloque:
+El detalle técnico completo se escribe en el archivo específico del componente o área utilizando strictly el siguiente bloque:
 
 ```markdown
 ---
