@@ -1,7 +1,8 @@
 -- ==========================================
--- ARCHIVO MAESTRO DE ESQUEMA DE BASE DE DATOS
--- Proyecto: CalculaPe
--- Este archivo representa el estado consolidado de la base de datos.
+-- App Origen: backend
+-- Autor: AI Agent (Tech Lead)
+-- Fecha: 2026-08-09
+-- Justificación: [E1] Fundamentos y Base de Datos. Esquema inicial, RLS y Triggers (Freemium gating).
 -- ==========================================
 
 -- 1. TIPOS ENUMERADOS
@@ -170,6 +171,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- Check if trigger exists before recreating (for idempotency)
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users

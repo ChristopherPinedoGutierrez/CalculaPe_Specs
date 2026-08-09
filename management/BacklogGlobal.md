@@ -12,7 +12,7 @@ Este documento es la única fuente de verdad para el desarrollo. Toda historia d
 * [ ] App: backend | Configurar Row Level Security (RLS) para proteger lectura/escritura en perfiles.
 * [ ] App: backend | Configurar RLS para `groups`, `transactions` y storage basado en membresía (`group_members`).
 * [ ] App: backend | Crear Trigger `handle_new_user_invitation` para vincular invitaciones al registrarse con Google.
-* [ ] App: backend | Implementar Triggers en PostgreSQL para control de límites Freemium (gating de grupos/miembros).
+* [ ] App: backend | Implementar Triggers en PostgreSQL para control de límites Freemium (Max 1 Grupo, Max 3 miembros para plan Free).
 
 ## [E2] Autenticación e Infraestructura App
 **Épica: Configuración Base de Proyecto**
@@ -56,5 +56,15 @@ Este documento es la única fuente de verdad para el desarrollo. Toda historia d
 * [ ] App: mobile | Visualización de gráficos estadísticos (gastos por categoría, establecimiento y miembro).
 
 **Épica: Resiliencia y Notificaciones (Realtime)**
-* [ ] App: mobile | Suscripción a Supabase Realtime para reflejar cambios instantáneos cuando la app está activa.
-* [ ] App: mobile | Integrar Firebase Cloud Messaging (FCM) para notificaciones push confiables en segundo plano (Android background/doze).
+* [ ] App: mobile | Suscripción a Supabase Realtime (Foreground) habilitada para TODOS los usuarios (Free y Pro) para asegurar actualización visual al instante.
+* [ ] App: mobile | Integrar Firebase Cloud Messaging (FCM) para notificaciones en segundo plano (Background) EXCLUSIVO para dispositivos de usuarios PRO.
+
+## [E6] Monetización (Ads y Suscripciones)
+**Épica: In-App Purchases (Suscripción PRO)**
+* [ ] App: mobile | Integrar RevenueCat / React Native IAP para conexión con Google Play Billing.
+* [ ] App: mobile | Crear pantalla de "Paywall" (Planes y beneficios) y enlazar actualización del `subscription_tier` en Supabase al confirmar compra.
+
+**Épica: Google AdMob (Plan Free)**
+* [ ] App: mobile | Configurar `react-native-google-mobile-ads` y registrar bloques de anuncios (Banners e Intersticiales).
+* [ ] App: mobile | Lógica de Banners: Mostrar a usuarios Free, SALVO que estén navegando dentro de un grupo creado por un usuario PRO (Herencia de Contexto Ad-Free).
+* [ ] App: mobile | Lógica de Intersticiales: Mostrar a usuarios Free (tras acciones de alto valor), aplicando la misma herencia de contexto si están en un grupo PRO.
