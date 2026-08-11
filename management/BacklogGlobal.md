@@ -4,25 +4,25 @@ Este documento es la única fuente de verdad para el desarrollo. Toda historia d
 
 ## [E1] Fundamentos y Base de Datos
 **Épica: Diseño de Esquema y Tablas**
-* [ ] App: backend | Crear tablas base: `profiles`, `groups`, `group_members` (incluye roles y `monthly_income`).
-* [ ] App: backend | Crear tablas operativas: `categories`, `payment_methods`, `merchants`, `transactions`.
-* [ ] App: backend | Crear tabla de gestión: `invitations` para flujo híbrido de correos.
+* [x] App: backend | Crear tablas base: `profiles`, `groups`, `group_members` (incluye roles y `monthly_income`).
+* [x] App: backend | Crear tablas operativas: `categories`, `payment_methods`, `merchants`, `transactions`.
+* [x] App: backend | Crear tabla de gestión: `invitations` para flujo híbrido de correos.
 
 **Épica: Seguridad (RLS) y Reglas de Negocio**
-* [ ] App: backend | Configurar Row Level Security (RLS) para proteger lectura/escritura en perfiles.
-* [ ] App: backend | Configurar RLS para `groups`, `transactions` y storage basado en membresía (`group_members`).
-* [ ] App: backend | Crear Trigger `handle_new_user_invitation` para vincular invitaciones al registrarse con Google.
-* [ ] App: backend | Implementar Triggers en PostgreSQL para control de límites Freemium (Max 1 Grupo, Max 3 miembros para plan Free).
+* [x] App: backend | Configurar Row Level Security (RLS) para proteger lectura/escritura en perfiles.
+* [x] App: backend | Configurar RLS para `groups`, `transactions` y storage basado en membresía (`group_members`).
+* [x] App: backend | Crear Trigger `handle_new_user_invitation` para vincular invitaciones al registrarse con Google.
+* [x] App: backend | Implementar Triggers en PostgreSQL para control de límites Freemium (Max 1 Grupo, Max 3 miembros para plan Free).
 
 ## [E2] Autenticación e Infraestructura App
 **Épica: Configuración Base de Proyecto**
-* [ ] App: mobile | Inicializar proyecto Expo (React Native) con TypeScript estricto.
-* [ ] App: mobile | Configurar navegación basada en archivos con Expo Router.
-* [ ] App: mobile | Integrar React Native Paper para componentes UI / Material Design.
+* [x] App: mobile | Inicializar proyecto Expo (React Native) con TypeScript estricto.
+* [x] App: mobile | Configurar navegación basada en archivos con Expo Router.
+* [x] App: mobile | Integrar React Native Paper para componentes UI / Material Design.
 
 **Épica: Autenticación de Usuarios**
-* [ ] App: mobile | Integrar Supabase Auth delegado a Google OAuth (Google Sign-In).
-* [ ] App: mobile | Crear flujo de login y protección de rutas (Auth Guard).
+* [x] App: mobile | Integrar Supabase Auth delegado a Google OAuth (Google Sign-In).
+* [x] App: mobile | Crear flujo de login y protección de rutas (Auth Guard).
 
 **Épica: Motor Offline y Sincronización**
 * [ ] App: mobile | Configurar base de datos local `expo-sqlite` para almacenamiento primario Offline-First.
