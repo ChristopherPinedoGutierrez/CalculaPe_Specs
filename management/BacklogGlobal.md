@@ -29,8 +29,12 @@ Este documento es la única fuente de verdad para el desarrollo. Toda historia d
 * [x] App: mobile | Desarrollar motor de sincronización diferencial (Delta Sync en background) hacia Supabase RPCs/REST.
 
 ## [E3] Gestión de Espacios y Transacciones
-**Épica: Grupos e Invitaciones**
-* [ ] App: mobile | UI y lógica para crear grupos y administrar miembros (Asignación de bolsa común / ingresos).
+**Épica: Grupos, Perfil e Invitaciones**
+* [x] App: mobile | UI y lógica para crear grupos y administrar miembros (Asignación de bolsa común / ingresos).
+* [x] App: mobile | Sincronización del perfil de usuario (`subscription_tier` pro/free y `display_name`) entre Supabase y SQLite con soporte en Delta Sync (`updated_at`).
+* [x] App: mobile | Navegación inferior (Bottom Tabs), pantalla de Perfil/Configuración con edición de nombre de usuario y cierre de sesión con diálogo de confirmación.
+* [x] App: mobile | Refinamiento de grupos: Editar nombre de grupo, abandonar grupo (Miembros) y eliminación destructiva en cascada con diálogo de confirmación (Admins).
+* [x] App: mobile | Arquitectura de Design System y Tema Centralizado (`src/theme`) con soporte para Modo Claro/Oscuro/Sistema, paleta corporativa y persistencia de preferencia.
 * [ ] App: mobile | UI para envío, recepción y aceptación de invitaciones por email.
 
 **Épica: Gestión de Transacciones (Manual)**

@@ -114,18 +114,27 @@ USING (created_by = auth.uid() OR id IN (SELECT public.get_user_group_ids(auth.u
 CREATE POLICY "Crear grupos propios" ON public.groups FOR INSERT WITH CHECK (created_by = auth.uid());
 CREATE POLICY "Actualizar grupos creados" ON public.groups FOR UPDATE USING (created_by = auth.uid());
 
+-- Función auxiliar con SECURITY DEFINER para verificar rol admin sin disparar recursión RLS
+CREATE OR REPLACE FUNCTION public.is_group_admin(_group_id uuid, _user_id uuid)
+RETURNS boolean AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.group_members
+    WHERE group_id = _group_id AND user_id = _user_id AND role = 'admin'
+  );
+$$ LANGUAGE sql SECURITY DEFINER STABLE;
+
 -- Políticas de Group Members
 CREATE POLICY "Ver miembros de mi grupo" ON public.group_members FOR SELECT 
 USING (user_id = auth.uid() OR group_id IN (SELECT public.get_user_group_ids(auth.uid())));
 CREATE POLICY "Admins pueden insertar miembros" ON public.group_members FOR INSERT 
 WITH CHECK (
     EXISTS (SELECT 1 FROM public.groups WHERE id = group_id AND created_by = auth.uid()) OR 
-    EXISTS (SELECT 1 FROM public.group_members WHERE group_id = group_members.group_id AND user_id = auth.uid() AND role = 'admin')
+    public.is_group_admin(group_id, auth.uid())
 );
 CREATE POLICY "Admins o usuarios propios pueden actualizar" ON public.group_members FOR UPDATE 
 USING (
     user_id = auth.uid() OR 
-    EXISTS (SELECT 1 FROM public.group_members gm WHERE gm.group_id = group_members.group_id AND gm.user_id = auth.uid() AND gm.role = 'admin')
+    public.is_group_admin(group_id, auth.uid())
 );
 
 -- Políticas de Invitations
