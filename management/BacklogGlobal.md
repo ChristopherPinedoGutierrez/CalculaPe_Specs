@@ -25,8 +25,8 @@ Este documento es la única fuente de verdad para el desarrollo. Toda historia d
 * [x] App: mobile | Crear flujo de login y protección de rutas (Auth Guard).
 
 **Épica: Motor Offline y Sincronización**
-* [ ] App: mobile | Configurar base de datos local `expo-sqlite` para almacenamiento primario Offline-First.
-* [ ] App: mobile | Desarrollar motor de sincronización diferencial (Delta Sync en background) hacia Supabase RPCs/REST.
+* [x] App: mobile | Configurar base de datos local `expo-sqlite` para almacenamiento primario Offline-First.
+* [x] App: mobile | Desarrollar motor de sincronización diferencial (Delta Sync en background) hacia Supabase RPCs/REST.
 
 ## [E3] Gestión de Espacios y Transacciones
 **Épica: Grupos e Invitaciones**

@@ -102,14 +102,21 @@ CREATE POLICY "Perfiles públicos para lectura" ON public.profiles FOR SELECT US
 CREATE POLICY "Usuarios pueden actualizar su propio perfil" ON public.profiles FOR UPDATE USING (auth.uid() = id);
 
 -- Políticas de Groups
+-- Función auxiliar con SECURITY DEFINER para romper recursión en políticas RLS
+CREATE OR REPLACE FUNCTION public.get_user_group_ids(_user_id uuid)
+RETURNS SETOF uuid AS $$
+  SELECT group_id FROM public.group_members WHERE user_id = _user_id;
+$$ LANGUAGE sql SECURITY DEFINER STABLE;
+
+-- Políticas de Groups
 CREATE POLICY "Ver grupos propios o donde soy miembro" ON public.groups FOR SELECT 
-USING (created_by = auth.uid() OR id IN (SELECT group_id FROM public.group_members WHERE user_id = auth.uid()));
+USING (created_by = auth.uid() OR id IN (SELECT public.get_user_group_ids(auth.uid())));
 CREATE POLICY "Crear grupos propios" ON public.groups FOR INSERT WITH CHECK (created_by = auth.uid());
 CREATE POLICY "Actualizar grupos creados" ON public.groups FOR UPDATE USING (created_by = auth.uid());
 
 -- Políticas de Group Members
 CREATE POLICY "Ver miembros de mi grupo" ON public.group_members FOR SELECT 
-USING (user_id = auth.uid() OR group_id IN (SELECT group_id FROM public.group_members WHERE user_id = auth.uid()));
+USING (user_id = auth.uid() OR group_id IN (SELECT public.get_user_group_ids(auth.uid())));
 CREATE POLICY "Admins pueden insertar miembros" ON public.group_members FOR INSERT 
 WITH CHECK (
     EXISTS (SELECT 1 FROM public.groups WHERE id = group_id AND created_by = auth.uid()) OR 
@@ -134,12 +141,12 @@ WITH CHECK (
 CREATE POLICY "Ver transacciones propias o grupales" ON public.transactions FOR SELECT 
 USING (
     (group_id IS NULL AND created_by = auth.uid()) OR 
-    (group_id IS NOT NULL AND group_id IN (SELECT group_id FROM public.group_members WHERE user_id = auth.uid()))
+    (group_id IS NOT NULL AND group_id IN (SELECT public.get_user_group_ids(auth.uid())))
 );
 CREATE POLICY "Insertar transacciones propias o grupales" ON public.transactions FOR INSERT 
 WITH CHECK (
     (group_id IS NULL AND created_by = auth.uid()) OR 
-    (group_id IS NOT NULL AND group_id IN (SELECT group_id FROM public.group_members WHERE user_id = auth.uid()))
+    (group_id IS NOT NULL AND group_id IN (SELECT public.get_user_group_ids(auth.uid())))
 );
 CREATE POLICY "Editar transacciones propias o por admin" ON public.transactions FOR UPDATE 
 USING (
@@ -153,7 +160,7 @@ USING (
 );
 
 -- Políticas generales de catálogos (Categorías, Metodos, Comercios)
-CREATE POLICY "Catalogos globales y grupales" ON public.categories FOR SELECT USING (is_global = true OR group_id IN (SELECT group_id FROM public.group_members WHERE user_id = auth.uid()));
+CREATE POLICY "Catalogos globales y grupales" ON public.categories FOR SELECT USING (is_global = true OR group_id IN (SELECT public.get_user_group_ids(auth.uid())));
 CREATE POLICY "Metodos de pago globales" ON public.payment_methods FOR SELECT USING (true);
 CREATE POLICY "Comercios globales" ON public.merchants FOR SELECT USING (true);
 
