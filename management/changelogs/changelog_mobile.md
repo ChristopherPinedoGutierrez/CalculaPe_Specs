@@ -1,6 +1,50 @@
 # Changelog Móvil (App)
 
 ---
+### [2026-08-14 14:49] | App: mobile/backend | Autor: TECH_LEAD_AI
+
+* **Descripción:** Solución de la falla de sincronización en Supabase (error de sintaxis de UUID en categorías/medios de pago), adición de política RLS DELETE en `group_members`, corrección del cálculo del límite Freemium al crear grupos y adición de distintivos de rol en la UI.
+* **Detalles Técnicos:**
+  - **Sincronización en Supabase:** Se poblaron las tablas `categories` y `payment_methods` en Supabase con UUIDs estándar válidos y se actualizaron `DEFAULT_CATEGORIES` y `DEFAULT_PAYMENT_METHODS` en la app local, permitiendo que las transacciones se inserten limpiamente en Supabase.
+  - **Política RLS DELETE:** Se añadió la política RLS `Eliminar membresia de grupo` en Supabase (`user_id = auth.uid() OR is_group_admin(...)`), permitiendo a los usuarios no administradores abandonar un grupo sin que la sincronización vuelva a restaurarlo.
+  - **Validación Freemium Corregida:** Se ajustó `createGroup` en `groupsRepository.ts` para validar `SELECT COUNT(*) FROM groups WHERE created_by = createdBy`. Ahora un usuario en plan Free puede ser invitado a múltiples grupos sin ser bloqueado de crear su grupo propio de derecho.
+  - **UI & Fragment Props Warning:** Se reemplazó `React.Fragment` por `View` con `key` en `index.tsx` y `groups/[id].tsx`, eliminando advertencias de consola. Se agregaron Chips indicando `Creador / Admin` vs `Invitado / Miembro` en las tarjetas de grupos del Dashboard.
+* **Criterios de Aceptación (AC) Validados:**
+  - [x] AC 1: Verificación de compilación estricta TypeScript (`cmd /c node node_modules/typescript/bin/tsc --noEmit`) con exit code 0.
+  - [x] AC 2: Ejecución limpia del servidor local Expo y verificación de logs sin errores.
+---
+
+---
+### [2026-08-14 12:44] | App: mobile | Autor: TECH_LEAD_AI
+
+* **Descripción:** Refinamiento profundo de UI/UX e infraestructura de datos para Transacciones Manuales ([E3]), implementando el almacenamiento de montos en céntimos enteros, estandarización de moneda en Soles (S/.), selectores modales limpios para espacios/categorías/medios de pago y desaturación del Dashboard.
+* **Detalles Técnicos:**
+  - **Montos en Céntimos Enteros:** Actualización de `transactionsRepository.ts` para multiplicar el importe flotante por 100 (`Math.round(amount * 100)`) al guardar en SQLite/Supabase, eliminando imprecisiones de punto flotante en JavaScript. Conversión inversa a decimal en UI `(amount / 100).toFixed(2)`.
+  - **Estandarización Moneda:** Eliminado el selector de dólares; la moneda queda fijada en Soles (`PEN` - S/.) limpiando el formulario.
+  - **Selector de Espacios / Grupos:** Reemplazado el toggle abstracto por un picker modal limpio de Espacios/Grupos (`userGroups`), solucionando el ciclo de re-renderizado de React que reseteaba la selección del grupo.
+  - **Selectores Limpios de Categorías y Medios de Pago:** Reemplazado el listado abierto masivo de chips por tarjetas compactas con feedback de selección y modales dedicados de selección con RadioButtons.
+  - **Desaturación del Dashboard (`index.tsx`):** Simplificada la vista de inicio eliminando menús complejos para enfocar la experiencia en Espacios/Grupos y un botón limpio `+ Registrar Gasto`.
+* **Criterios de Aceptación (AC) Validados:**
+  - [x] AC 1: Verificación de compilación estricta TypeScript (`cmd /c node node_modules/typescript/bin/tsc --noEmit`) con exit code 0.
+  - [x] AC 2: Inicialización limpia del proyecto y servidor local Expo (`cmd /c npx expo start -c`) para pruebas en Expo Go.
+---
+
+---
+### [2026-08-14 11:28] | App: mobile | Autor: TECH_LEAD_AI
+
+* **Descripción:** Culminación completa de la Épica de Gestión de Transacciones Manuales de [E3], incluyendo repositorios SQLite local, formulario de gastos, selector de contexto personal vs. grupal, manejo del doble sello de fechas, comercios privados y menú multi-acción en Dashboard.
+* **Detalles Técnicos:**
+  - **Repositorios y Semillas:** Creación de `categoriesRepository.ts`, `paymentMethodsRepository.ts`, `merchantsRepository.ts` y `transactionsRepository.ts`. Sembrado automático de 8 categorías globales y 4 medios de pago estándar (`Efectivo`, `Tarjeta de Débito`, `Tarjeta de Crédito`, `Billeteras Digitales`) en SQLite local.
+  - **Doble Sello de Fechas & Cero Fricción [E4]:** Desacoplamiento entre `transaction_date` (fecha real de consumo) y `created_at` (registro en sistema). Columna `receipt_url` lista para la futura recepción de URLs de imágenes de comprobantes desde el escáner QR/OCR.
+  - **Comercios Privados & Smart Pre-fill:** Autocompletado privado limitado exclusivamente al historial del usuario. Pre-selección inteligente de la última categoría utilizada en dicho comercio.
+  - **Formulario y Vistas UI:** Creación de `app/(app)/transactions/create.tsx` (registro manual) y `app/(app)/transactions/[id].tsx` (detalle, edición, eliminación y reasignación de espacio "Mover a otro Espacio"). Integración de transacciones recientes en el Dashboard (`index.tsx`) y sección de Gastos del Grupo en `groups/[id].tsx`.
+* **Criterios de Aceptación (AC) Validados:**
+  - [x] AC 1: Verificación de compilación estricta de TypeScript (`npx tsc --noEmit`) con 0 errores (exit code 0).
+  - [x] AC 2: Verificación de configuración e inicialización limpia de Expo Dev Server (`cmd /c npx expo start -c`) para vinculación directa con Expo Go.
+  - [x] AC 3: Actualización de `BacklogGlobal.md` marcando la Épica de Transacciones Manuales como completada al 100%.
+---
+
+---
 ### [2026-08-13 14:15] | App: mobile | Autor: TECH_LEAD_AI
 
 * **Descripción:** Solución del problema de visibilidad de grupos al aceptar invitaciones mediante la exoneración del filtro delta de fecha en las tablas `groups` y `group_members` durante la sincronización.

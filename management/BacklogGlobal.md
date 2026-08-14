@@ -39,8 +39,8 @@ Este documento es la única fuente de verdad para el desarrollo. Toda historia d
 * [x] App: mobile | Gestión de invitaciones enviadas (visibilidad por grupo en detalle, pestaña Enviadas en configuración y revocación/reinvitación por admin).
 
 **Épica: Gestión de Transacciones (Manual)**
-* [ ] App: mobile | Formulario de registro de gastos manuales.
-* [ ] App: mobile | Selector de contexto: alternancia fluida entre registrar en espacio personal (`group_id IS NULL`) o grupal.
+* [x] App: mobile | Formulario de registro de gastos manuales.
+* [x] App: mobile | Selector de contexto: alternancia fluida entre registrar en espacio personal (`group_id IS NULL`) o grupal.
 
 ## [E4] Escaneo Híbrido y Procesamiento de Comprobantes
 **Épica: Módulo Cámara y Parser QR**
