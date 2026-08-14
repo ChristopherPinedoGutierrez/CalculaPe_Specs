@@ -35,7 +35,8 @@ Este documento es la única fuente de verdad para el desarrollo. Toda historia d
 * [x] App: mobile | Navegación inferior (Bottom Tabs), pantalla de Perfil/Configuración con edición de nombre de usuario y cierre de sesión con diálogo de confirmación.
 * [x] App: mobile | Refinamiento de grupos: Editar nombre de grupo, abandonar grupo (Miembros) y eliminación destructiva en cascada con diálogo de confirmación (Admins).
 * [x] App: mobile | Arquitectura de Design System y Tema Centralizado (`src/theme`) con soporte para Modo Claro/Oscuro/Sistema, paleta corporativa y persistencia de preferencia.
-* [ ] App: mobile | UI para envío, recepción y aceptación de invitaciones por email.
+* [x] App: mobile | UI para envío, recepción y aceptación de invitaciones por email.
+* [x] App: mobile | Gestión de invitaciones enviadas (visibilidad por grupo en detalle, pestaña Enviadas en configuración y revocación/reinvitación por admin).
 
 **Épica: Gestión de Transacciones (Manual)**
 * [ ] App: mobile | Formulario de registro de gastos manuales.

@@ -7,7 +7,8 @@
 -- 1. TIPOS ENUMERADOS
 CREATE TYPE public.subscription_type AS ENUM ('free', 'pro');
 CREATE TYPE public.member_role AS ENUM ('admin', 'member');
-CREATE TYPE public.invitation_status AS ENUM ('pending', 'accepted');
+CREATE TYPE public.member_status AS ENUM ('active', 'blocked');
+CREATE TYPE public.invitation_status AS ENUM ('pending', 'accepted', 'declined', 'cancelled');
 
 -- 2. TABLAS BASE
 CREATE TABLE public.profiles (
@@ -33,6 +34,7 @@ CREATE TABLE public.group_members (
     group_id UUID NOT NULL REFERENCES public.groups(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
     role public.member_role DEFAULT 'member'::public.member_role,
+    status public.member_status DEFAULT 'active'::public.member_status,
     group_nickname TEXT,
     monthly_income NUMERIC(12, 2) DEFAULT 0,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -113,6 +115,7 @@ CREATE POLICY "Ver grupos propios o donde soy miembro" ON public.groups FOR SELE
 USING (created_by = auth.uid() OR id IN (SELECT public.get_user_group_ids(auth.uid())));
 CREATE POLICY "Crear grupos propios" ON public.groups FOR INSERT WITH CHECK (created_by = auth.uid());
 CREATE POLICY "Actualizar grupos creados" ON public.groups FOR UPDATE USING (created_by = auth.uid());
+CREATE POLICY "Eliminar grupos creados por el dueño" ON public.groups FOR DELETE USING (created_by = auth.uid());
 
 -- Función auxiliar con SECURITY DEFINER para verificar rol admin sin disparar recursión RLS
 CREATE OR REPLACE FUNCTION public.is_group_admin(_group_id uuid, _user_id uuid)
@@ -142,6 +145,18 @@ CREATE POLICY "Ver mis invitaciones enviadas o recibidas" ON public.invitations 
 USING (email = (SELECT email FROM public.profiles WHERE id = auth.uid()) OR invited_by = auth.uid());
 CREATE POLICY "Admins pueden invitar" ON public.invitations FOR INSERT 
 WITH CHECK (
+    EXISTS (SELECT 1 FROM public.groups WHERE id = group_id AND created_by = auth.uid()) OR 
+    EXISTS (SELECT 1 FROM public.group_members WHERE group_id = invitations.group_id AND user_id = auth.uid() AND role = 'admin')
+);
+CREATE POLICY "Admins o invitadores pueden eliminar sus invitaciones" ON public.invitations FOR DELETE 
+USING (
+    invited_by = auth.uid() OR 
+    EXISTS (SELECT 1 FROM public.groups WHERE id = group_id AND created_by = auth.uid()) OR 
+    EXISTS (SELECT 1 FROM public.group_members WHERE group_id = invitations.group_id AND user_id = auth.uid() AND role = 'admin')
+);
+CREATE POLICY "Admins pueden actualizar sus invitaciones" ON public.invitations FOR UPDATE 
+USING (
+    invited_by = auth.uid() OR 
     EXISTS (SELECT 1 FROM public.groups WHERE id = group_id AND created_by = auth.uid()) OR 
     EXISTS (SELECT 1 FROM public.group_members WHERE group_id = invitations.group_id AND user_id = auth.uid() AND role = 'admin')
 );
@@ -264,3 +279,69 @@ DROP TRIGGER IF EXISTS before_member_insert ON public.group_members;
 CREATE TRIGGER before_member_insert
   BEFORE INSERT ON public.group_members
   FOR EACH ROW EXECUTE PROCEDURE public.enforce_member_freemium_limits();
+
+-- 6. RPCs DE INVITACIONES
+CREATE OR REPLACE FUNCTION public.accept_invitation(p_invitation_id UUID)
+RETURNS void AS $$
+DECLARE
+  v_group_id UUID;
+  v_email TEXT;
+  v_user_id UUID;
+  v_creator_id UUID;
+  v_creator_tier public.subscription_type;
+  v_member_count INT;
+BEGIN
+  v_user_id := auth.uid();
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'UNAUTHORIZED: Usuario no autenticado.';
+  END IF;
+
+  SELECT email INTO v_email FROM public.profiles WHERE id = v_user_id;
+
+  SELECT group_id INTO v_group_id
+  FROM public.invitations
+  WHERE id = p_invitation_id AND (email = v_email OR email = (SELECT email FROM auth.users WHERE id = v_user_id)) AND status = 'pending';
+
+  IF v_group_id IS NULL THEN
+    RAISE EXCEPTION 'NOT_FOUND: Invitación no encontrada o ya procesada.';
+  END IF;
+
+  SELECT created_by INTO v_creator_id FROM public.groups WHERE id = v_group_id;
+  SELECT subscription_tier INTO v_creator_tier FROM public.profiles WHERE id = v_creator_id;
+
+  IF v_creator_tier = 'free' THEN
+    SELECT count(*) INTO v_member_count FROM public.group_members WHERE group_id = v_group_id;
+    IF v_member_count >= 3 THEN
+      RAISE EXCEPTION 'FREEMIUM_LIMIT_REACHED: El grupo ha alcanzado el límite máximo de 3 miembros para el plan Free.';
+    END IF;
+  END IF;
+
+  INSERT INTO public.group_members (group_id, user_id, role)
+  VALUES (v_group_id, v_user_id, 'member')
+  ON CONFLICT (group_id, user_id) DO NOTHING;
+
+  UPDATE public.invitations
+  SET status = 'accepted'
+  WHERE id = p_invitation_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION public.reject_invitation(p_invitation_id UUID)
+RETURNS void AS $$
+DECLARE
+  v_user_id UUID;
+  v_email TEXT;
+BEGIN
+  v_user_id := auth.uid();
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'UNAUTHORIZED: Usuario no autenticado.';
+  END IF;
+
+  SELECT email INTO v_email FROM public.profiles WHERE id = v_user_id;
+
+  UPDATE public.invitations
+  SET status = 'declined'
+  WHERE id = p_invitation_id AND (email = v_email OR email = (SELECT email FROM auth.users WHERE id = v_user_id));
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
